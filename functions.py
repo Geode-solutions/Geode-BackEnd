@@ -100,3 +100,4 @@ def create_lock_file():
 def remove_lock_file():
     LOCK_FOLDER = flask.current_app.config['LOCK_FOLDER']
     os.remove(f'{LOCK_FOLDER}/{str(flask.g.UUID)}.txt')
+    

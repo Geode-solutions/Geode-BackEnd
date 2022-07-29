@@ -2,9 +2,10 @@ import os
 import base64
 
 ID = os.environ.get('ID')
+baseRoute = f"/{ID}/fileconverter"
 
 def test_versions(client):
-    response = client.get(f'/{ID}/fileconverter/versions')
+    response = client.get(f'{baseRoute}/versions')
     assert response.status_code == 200
     versions = response.json['versions']
     assert type(versions) is list
@@ -12,7 +13,7 @@ def test_versions(client):
         assert type(version) is dict
 
 def test_allowedfiles(client):
-    response = client.get(f'/{ID}/fileconverter/allowedfiles')
+    response = client.get(f'{baseRoute}/allowedfiles')
     assert response.status_code == 200
     extensions = response.json['extensions']
     assert type(extensions) is list
@@ -22,14 +23,14 @@ def test_allowedfiles(client):
 
 def test_allowedobjects(client):
     # Normal test with filename 'corbi.og_brep'
-    response = client.post(f'/{ID}/fileconverter/allowedobjects', data={'filename': 'corbi.og_brep'})
+    response = client.post(f'{baseRoute}/allowedobjects', data={'filename': 'corbi.og_brep'})
     assert response.status_code == 200
     objects = response.json['objects']
     assert type(objects) is list
     assert 'BRep' in objects
 
     # Normal test with filename .vtu
-    response = client.post(f'/{ID}/fileconverter/allowedobjects', data={'filename': 'toto.vtu'})
+    response = client.post(f'{baseRoute}/allowedobjects', data={'filename': 'toto.vtu'})
     assert response.status_code == 200
     objects = response.json['objects']
     list_objects = ['HybridSolid3D', 'PolyhedralSolid3D', 'TetrahedralSolid3D']
@@ -37,21 +38,21 @@ def test_allowedobjects(client):
         assert object in objects
 
     # Test with stupid filename
-    response = client.post(f'/{ID}/fileconverter/allowedobjects', data={'filename': 'toto.tutu'})
+    response = client.post(f'{baseRoute}/allowedobjects', data={'filename': 'toto.tutu'})
     assert response.status_code == 200
     objects = response.json['objects']
     assert type(objects) is list
     assert not objects
 
     # Test without filename
-    response = client.post(f'/{ID}/fileconverter/allowedobjects')
+    response = client.post(f'{baseRoute}/allowedobjects')
     assert response.status_code == 400
     error_message = response.json['error_message']
     assert error_message == 'No file sent'
 
 def test_outputfileextensions(client):
     # Normal test with object
-    response = client.post(f'/{ID}/fileconverter/outputfileextensions', data={'object': 'BRep'})
+    response = client.post(f'{baseRoute}/outputfileextensions', data={'object': 'BRep'})
     assert response.status_code == 200
     outputfileextensions = response.json['outputfileextensions']
     assert type(outputfileextensions) is list
@@ -60,7 +61,7 @@ def test_outputfileextensions(client):
         assert outputfileextension in outputfileextensions
 
     # Normal test with object
-    response = client.post(f'/{ID}/fileconverter/outputfileextensions', data={'object': 'TriangulatedSurface3D'})
+    response = client.post(f'{baseRoute}/outputfileextensions', data={'object': 'TriangulatedSurface3D'})
     assert response.status_code == 200
     outputfileextensions = response.json['outputfileextensions']
     assert type(outputfileextensions) is list
@@ -69,7 +70,7 @@ def test_outputfileextensions(client):
         assert outputfileextension in outputfileextensions
 
     # Normal test with object
-    response = client.post(f'/{ID}/fileconverter/outputfileextensions', data={'object': 'StructuralModel'})
+    response = client.post(f'{baseRoute}/outputfileextensions', data={'object': 'StructuralModel'})
     assert response.status_code == 200
     outputfileextensions = response.json['outputfileextensions']
     assert type(outputfileextensions) is list
@@ -78,7 +79,7 @@ def test_outputfileextensions(client):
         assert outputfileextension in outputfileextensions
 
     # Test without object
-    response = client.post(f'/{ID}/fileconverter/outputfileextensions')
+    response = client.post(f'{baseRoute}/outputfileextensions')
     assert response.status_code == 400
     error_message = response.json['error_message']
     assert error_message == 'No object sent'
@@ -91,7 +92,7 @@ def test_convertfile(client):
     filesize = int(os.path.getsize('./tests/corbi.og_brep'))
     extension = 'msh'
 
-    response = client.post(f'/{ID}/fileconverter/convertfile',
+    response = client.post(f'{baseRoute}/convertfile',
         data = {
             'object': object,
             'file': file,
@@ -106,7 +107,7 @@ def test_convertfile(client):
     assert len((response.data)) > 0
 
     # Test without object
-    response = client.post(f'/{ID}/fileconverter/convertfile',
+    response = client.post(f'{baseRoute}/convertfile',
         data = {
             'file': file,
             'filename': filename,
@@ -120,7 +121,7 @@ def test_convertfile(client):
     assert error_message == 'No object sent'
 
     # Test without file
-    response = client.post(f'/{ID}/fileconverter/convertfile',
+    response = client.post(f'{baseRoute}/convertfile',
         data = {
             'object': object,
             'filename': filename,
@@ -134,7 +135,7 @@ def test_convertfile(client):
     assert error_message == 'No file sent'
 
     # Test without filename
-    response = client.post(f'/{ID}/fileconverter/convertfile',
+    response = client.post(f'{baseRoute}/convertfile',
         data = {
             'object': object,
             'file': file,
@@ -148,7 +149,7 @@ def test_convertfile(client):
     assert error_message == 'No filename sent'
 
     # Test without filesize
-    response = client.post(f'/{ID}/fileconverter/convertfile',
+    response = client.post(f'{baseRoute}/convertfile',
         data = {
             'object': object,
             'file': file,
@@ -162,7 +163,7 @@ def test_convertfile(client):
     assert error_message == 'No filesize sent'
 
     # Test without extension
-    response = client.post(f'/{ID}/fileconverter/convertfile',
+    response = client.post(f'{baseRoute}/convertfile',
         data = {
             'object': object,
             'file': file,

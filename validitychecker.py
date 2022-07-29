@@ -94,7 +94,18 @@ def vaditychecker_inspectfile():
             model = flask.session['model']
         inspector = InspectorFunctions.Inspectors()[object]['inspector'](model)
         testResult = getattr(inspector, test)()
-        return flask.make_response({"Result": testResult}, 200)
+        expectedValue = InspectorFunctions.InpectorExpectedResults()[test]
+
+        if testResult != expectedValue or type(testResult) != type(expectedValue):
+            print(test, ' : ', testResult)
+            if type(testResult) is dict:
+                for key in testResult:
+                    new_key = key.string()
+                    testResult[new_key] = testResult.pop(key)
+
+        result = testResult == expectedValue and type(testResult) == type(expectedValue)
+
+        return flask.make_response({"Result": result, "list_invalidities": str(testResult)}, 200)
 
     except Exception as e:
         print("error : ", str(e))
